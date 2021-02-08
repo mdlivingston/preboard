@@ -57,10 +57,10 @@ export default function Exam()
             <div className="sidebar">
                 <div className="sidebar-section"><b>Questions</b></div>
                 <div className="sidebar-section">1</div>
-                <div className="sidebar-section">1</div>
-                <div className="sidebar-section">1</div>
-                <div className="sidebar-section">1</div>
-                <div className="sidebar-section">1</div>
+                <div className="sidebar-section">2</div>
+                <div className="sidebar-section">3</div>
+                <div className="sidebar-section">4</div>
+                <div className="sidebar-section">5</div>
 
             </div>
             <div className="question-editor">
@@ -68,7 +68,7 @@ export default function Exam()
                 <div style={{ width: '750px' }}>
                     <CKEditor
                         editor={ClassicEditor}
-                        data={editorState ? editorState : 'Enter question here...'}
+                        data={editorState}
                         config={editorConfiguration}
                         onReady={editor =>
                         {
@@ -118,7 +118,7 @@ export default function Exam()
             db.questions.add({
                 html: editorState,
                 examId,
-                createdAt: db.getTimeStamp(),
+                createdAt: db.getCurrentTimeStamp(),
                 //userId: User.uid
             })
                 .then(function (questionData)
