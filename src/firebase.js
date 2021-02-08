@@ -14,7 +14,7 @@ export const auth = app.auth();
 const firestore = app.firestore()
 
 export const db = {
-    editor: firestore.collection('editor'),
+    questions: firestore.collection('questions'),
     exams: firestore.collection('exams'),
     formatDoc: doc =>
     {

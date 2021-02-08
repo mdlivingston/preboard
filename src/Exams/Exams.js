@@ -2,7 +2,7 @@ import { Button } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AddExam from './AddExam';
-import { db } from '../../firebase';
+import { db } from '../firebase';
 
 export default function Exams()
 {

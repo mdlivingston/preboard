@@ -1,0 +1,45 @@
+.exam-page {
+    display: flex;
+    height: 100%;
+}
+
+.flex-r {
+    height: 50px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+}
+
+.question-editor {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: column;
+    height: 500px;
+    flex: 10
+}
+
+.ck-editor__editable_inline {
+    min-height: 200px;
+}
+.sidebar {
+    width: 150px;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
+.sidebar-section {
+    height: 35px;
+    border-bottom: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
