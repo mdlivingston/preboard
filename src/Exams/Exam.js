@@ -46,7 +46,6 @@ export default function Exam()
         getQA(0)
     }, [])
 
-
     return (
         <div className="exam-page">
             <div className="sidebar">
@@ -212,7 +211,7 @@ export default function Exam()
         await getQuestions(index)
     }
 
-    async function getQuestionImages(qId)
+    function getQuestionImages(qId)
     {
         return db.files.where("questionId", "==", qId)
             .onSnapshot((querySnapshot) =>
