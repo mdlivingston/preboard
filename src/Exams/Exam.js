@@ -58,8 +58,6 @@ export default function Exam()
             </div>
             <div className="question-editor">
                 <br></br>
-                <h3> Question {questionIndex + 1}</h3>
-                <br></br>
                 <div style={{ width: '750px' }}>
                     <CKEditor
                         editor={ClassicEditor}
@@ -86,6 +84,10 @@ export default function Exam()
                     />
                 </div>
                 <br></br>
+                <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
+                    <FontAwesomeIcon icon={faPlus} />
+                        &nbsp; Add Answer
+                    </Button>
                 <div style={{ width: '400px' }}>
                     <Form.Group>
                         {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
@@ -108,19 +110,16 @@ export default function Exam()
                         ))}
                     </Form.Group>
                 </div>
-                <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
-                    <FontAwesomeIcon icon={faPlus} />
-                        &nbsp; Add Answer
-                    </Button>
+
                 <AddFileButton questionId={questionId} />
                 <br></br>
                 {images.length > 0 && images.map((image) => (
-                    <div style={{ padding: 10 }}>
+                    <div key={image.id} style={{ padding: 10 }}>
                         <img src={image.url} height="75"></img>
                     </div>
                 ))}
-                <br></br>
-                <Button variant="contained" style={{ backgroundColor: 'green', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button>
+                {/* <br></br>
+                <Button variant="contained" style={{ backgroundColor: 'green', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button> */}
             </div>
 
         </div>

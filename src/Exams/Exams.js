@@ -27,11 +27,12 @@ export default function Exams()
     return (
         <div className="exams-page">
             <div className="flex-r">
-                <h2>Exams </h2>
+
             </div>
             <div className="flex-r">
                 <AddExam />
             </div>
+            <br></br>
             <div className="content">
                 {exams && (
                     exams.map(e => (
