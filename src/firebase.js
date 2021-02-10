@@ -1,5 +1,7 @@
 import 'firebase/auth';
-import firebase from 'firebase';
+import 'firebase/storage';
+import 'firebase/firestore';
+import firebase from 'firebase/app';
 
 var app = firebase.initializeApp({
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -16,6 +18,7 @@ const firestore = app.firestore()
 export const db = {
     questions: firestore.collection('questions'),
     exams: firestore.collection('exams'),
+    answers: firestore.collection('answers'),
     formatDoc: doc =>
     {
         return {

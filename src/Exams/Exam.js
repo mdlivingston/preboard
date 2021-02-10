@@ -3,7 +3,9 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { db } from '../firebase'
 import { useParams } from 'react-router-dom';
-import { Button, Col, Form, ListGroup } from 'react-bootstrap';
+import { Button, Col, Form } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './Exam.css'
 
 const editorConfiguration = {
@@ -31,12 +33,30 @@ export default function Exam()
     const [questionIndex, setQuestionIndex] = React.useState(0);
     const [editorState, setEditorState] = React.useState();
     const [questions, setQuestions] = React.useState([]);
-    const [answers, setAnswers] = React.useState([[{ text: "", isCorrect: false }]]);
+    const [answers, setAnswers] = React.useState([]);
 
     const { examId } = useParams()
 
     function getQuestions(index) 
     {
+        db.answers
+            .where("examId", "==", examId)
+            .orderBy("createdAt")
+            .get()
+            .then(querySnapshot =>
+            {
+                let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
+
+                setAnswers([...data.map(doc =>
+                {
+                    return {
+                        id: doc.id,
+                        list: doc.list
+                    }
+
+                })])
+            });
+
         db.questions
             .where("examId", "==", examId)
             .orderBy("createdAt")
@@ -107,6 +127,7 @@ export default function Exam()
                         }}
                         onBlur={(event, editor) =>
                         {
+                            saveEditorData()
                             //console.log('Blur.', editor);
                         }}
                         onFocus={(event, editor) =>
@@ -118,8 +139,8 @@ export default function Exam()
                 <br></br>
                 <div>
                     <Form.Group>
-                        {answers[questionIndex] && answers[questionIndex].map((a, i) => (
-                            <div>
+                        {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
+                            <div key={i}>
                                 <Form.Row>
                                     <Form.Label column lg={2}>
                                         <Form.Check
@@ -130,7 +151,7 @@ export default function Exam()
                                         />
                                     </Form.Label>
                                     <Col>
-                                        <Form.Control type="text" as={'textarea'} placeholder="Answer text..." />
+                                        <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
                                     </Col>
                                 </Form.Row>
                                 <br></br>
@@ -139,8 +160,12 @@ export default function Exam()
                     </Form.Group>
 
                 </div>
-                <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>Add Anwser</Button>
-                <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button>
+                <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
+                    <FontAwesomeIcon icon={faPlus} />
+                        &nbsp; Add Answer
+                    </Button>
+                <br></br>
+                <Button variant="contained" style={{ backgroundColor: 'green', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button>
             </div>
 
         </div>
@@ -156,28 +181,34 @@ export default function Exam()
 
     function goToQuestion(index)
     {
-        setAnswers([...answers, [{ text: "", isCorrect: false }]])
         setQuestionId(questions[index].id)
         setQuestionIndex(index)
         setEditorState(questions[index].html)
-
     }
 
+    function answerOnChange(e, i)
+    {
+        let tempArr = [...answers]
+        tempArr[questionIndex].list[i].text = e.target.value
+        setAnswers(tempArr)
+    }
     function correctOnChange(e, i)
     {
         let tempArr = [...answers]
-        tempArr[questionIndex].forEach((a, mi) =>
+        tempArr[questionIndex].list.forEach((a, mi) =>
         {
             a.isCorrect = mi === i && e.target.value === 'on' ? true : false
         })
         setAnswers(tempArr)
+        saveEditorData()
     }
 
     function addAnswer()
     {
         let tempArr = [...answers];
-        tempArr[questionIndex] = [...tempArr[questionIndex], { text: "", isCorrect: false }]
+        tempArr[questionIndex].list = [...tempArr[questionIndex].list, { text: "", isCorrect: false }]
         setAnswers(tempArr)
+        saveEditorData()
     }
 
     function addQuestion()
@@ -188,9 +219,9 @@ export default function Exam()
             createdAt: db.getCurrentTimeStamp(),
             //userId: User.uid
         })
-            .then(function (questionData)
+            .then(async function (questionData)
             {
-                debugger
+                await db.answers.add({ list: [{ text: "", isCorrect: false }], examId, createdAt: db.getCurrentTimeStamp(), })
                 getQuestions(questions.length)
                 console.log("Document successfully written!");
             })
@@ -207,8 +238,9 @@ export default function Exam()
             examId,
             //userId: User.uid
         }, { merge: true })
-            .then(function ()
+            .then(async function ()
             {
+                await db.answers.doc(answers[questionIndex].id).set({ list: answers[questionIndex].list }, { merge: true })
                 getQuestions(questionIndex)
                 console.log("Document successfully written!");
             })
