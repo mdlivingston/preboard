@@ -3,7 +3,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { db } from '../firebase'
 import { useParams } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
+import { Button, Col, Form, ListGroup } from 'react-bootstrap';
 import './Exam.css'
 
 const editorConfiguration = {
@@ -23,12 +23,15 @@ const editorConfiguration = {
     }
 };
 
+const answerKeys = ["A", "B", "C", "D", "E", "F", "G", "H"]
+
 export default function Exam()
 {
     const [questionId, setQuestionId] = React.useState();
     const [questionIndex, setQuestionIndex] = React.useState(0);
     const [editorState, setEditorState] = React.useState();
-    const [questions, setQuestions] = React.useState();
+    const [questions, setQuestions] = React.useState([]);
+    const [answers, setAnswers] = React.useState([[{ text: "", isCorrect: false }]]);
 
     const { examId } = useParams()
 
@@ -50,7 +53,6 @@ export default function Exam()
                 }
 
                 setQuestions(data)
-                console.log(1)
 
                 // First load with questions
                 if (!questionId)
@@ -61,6 +63,7 @@ export default function Exam()
                 }
                 else // After first load
                 {
+                    setQuestionIndex(index)
                     setEditorState(data[index].html)
                     setQuestionId(data[index].id)
                 }
@@ -80,12 +83,14 @@ export default function Exam()
                 {!questions && <div className="sidebar-section">1</div>}
                 {questions && questions.map((q, i) =>
                 (
-                    <div onClick={() => goToQuestion(i)} className="sidebar-section">{i + 1}</div>
+                    <div key={q.id} onClick={() => goToQuestion(i)} className="sidebar-section" style={{ backgroundColor: i === questionIndex ? 'lightgrey' : '' }}>{i + 1}</div>
                 ))}
                 <div onClick={addQuestion} className="sidebar-section"> + </div>
             </div>
             <div className="question-editor">
+                <br></br>
                 <h3> Question {questionIndex + 1}</h3>
+                <br></br>
                 <div style={{ width: '750px' }}>
                     <CKEditor
                         editor={ClassicEditor}
@@ -110,9 +115,34 @@ export default function Exam()
                         }}
                     />
                 </div>
+                <br></br>
+                <div>
+                    <Form.Group>
+                        {answers[questionIndex] && answers[questionIndex].map((a, i) => (
+                            <div>
+                                <Form.Row>
+                                    <Form.Label column lg={2}>
+                                        <Form.Check
+                                            type="radio"
+                                            label={answerKeys[i] + '.'}
+                                            checked={a.isCorrect}
+                                            onChange={(e) => correctOnChange(e, i)}
+                                        />
+                                    </Form.Label>
+                                    <Col>
+                                        <Form.Control type="text" as={'textarea'} placeholder="Answer text..." />
+                                    </Col>
+                                </Form.Row>
+                                <br></br>
+                            </div>
+                        ))}
+                    </Form.Group>
 
+                </div>
+                <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>Add Anwser</Button>
                 <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button>
             </div>
+
         </div>
     )
 
@@ -126,16 +156,32 @@ export default function Exam()
 
     function goToQuestion(index)
     {
+        setAnswers([...answers, [{ text: "", isCorrect: false }]])
         setQuestionId(questions[index].id)
         setQuestionIndex(index)
         setEditorState(questions[index].html)
+
+    }
+
+    function correctOnChange(e, i)
+    {
+        let tempArr = [...answers]
+        tempArr[questionIndex].forEach((a, mi) =>
+        {
+            a.isCorrect = mi === i && e.target.value === 'on' ? true : false
+        })
+        setAnswers(tempArr)
+    }
+
+    function addAnswer()
+    {
+        let tempArr = [...answers];
+        tempArr[questionIndex] = [...tempArr[questionIndex], { text: "", isCorrect: false }]
+        setAnswers(tempArr)
     }
 
     function addQuestion()
     {
-        setQuestionIndex(questions ? questions.length : 0)
-        setEditorState("")
-
         db.questions.add({
             html: "",
             examId,
@@ -144,6 +190,7 @@ export default function Exam()
         })
             .then(function (questionData)
             {
+                debugger
                 getQuestions(questions.length)
                 console.log("Document successfully written!");
             })

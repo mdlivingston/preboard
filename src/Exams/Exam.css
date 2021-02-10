@@ -20,9 +20,7 @@
 .question-editor {
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
     flex-direction: column;
-    height: 500px;
     flex: 10
 }
 
@@ -44,3 +42,6 @@
     cursor: pointer;
 }
 
+.isSelected {
+    background-color: grey;
+}
