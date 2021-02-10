@@ -19,6 +19,7 @@ export const db = {
     questions: firestore.collection('questions'),
     exams: firestore.collection('exams'),
     answers: firestore.collection('answers'),
+    files: firestore.collection('files'),
     formatDoc: doc =>
     {
         return {

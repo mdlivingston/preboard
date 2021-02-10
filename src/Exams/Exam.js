@@ -7,6 +7,7 @@ import { Button, Col, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './Exam.css'
+import AddFileButton from './AddFileButton';
 
 const editorConfiguration = {
     toolbar: {
@@ -34,65 +35,13 @@ export default function Exam()
     const [editorState, setEditorState] = React.useState();
     const [questions, setQuestions] = React.useState([]);
     const [answers, setAnswers] = React.useState([]);
+    const [images, setImages] = React.useState([]);
 
     const { examId } = useParams()
 
-    function getQuestions(index) 
-    {
-        db.answers
-            .where("examId", "==", examId)
-            .orderBy("createdAt")
-            .get()
-            .then(querySnapshot =>
-            {
-                let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
-
-                setAnswers([...data.map(doc =>
-                {
-                    return {
-                        id: doc.id,
-                        list: doc.list
-                    }
-
-                })])
-            });
-
-        db.questions
-            .where("examId", "==", examId)
-            .orderBy("createdAt")
-            .get()
-            .then(querySnapshot =>
-            {
-                const data = querySnapshot.docs.map(doc => db.formatDoc(doc));
-
-                // No questions
-                if (data.length === 0)
-                {
-                    addQuestion()
-                    return
-                }
-
-                setQuestions(data)
-
-                // First load with questions
-                if (!questionId)
-                {
-                    setEditorState(data[0].html)
-                    setQuestionId(data[0].id)
-                    setQuestionIndex(0)
-                }
-                else // After first load
-                {
-                    setQuestionIndex(index)
-                    setEditorState(data[index].html)
-                    setQuestionId(data[index].id)
-                }
-            });
-    }
-
     useEffect(() =>
     {
-        getQuestions(0)
+        getQA(0)
     }, [])
 
 
@@ -105,7 +54,7 @@ export default function Exam()
                 (
                     <div key={q.id} onClick={() => goToQuestion(i)} className="sidebar-section" style={{ backgroundColor: i === questionIndex ? 'lightgrey' : '' }}>{i + 1}</div>
                 ))}
-                <div onClick={addQuestion} className="sidebar-section"> + </div>
+                <div onClick={addQA} className="sidebar-section"> + </div>
             </div>
             <div className="question-editor">
                 <br></br>
@@ -158,12 +107,18 @@ export default function Exam()
                             </div>
                         ))}
                     </Form.Group>
-
                 </div>
-                <Button variant="contained" style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
+                <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
                     <FontAwesomeIcon icon={faPlus} />
                         &nbsp; Add Answer
                     </Button>
+                <AddFileButton questionId={questionId} />
+                <br></br>
+                {images.length > 0 && images.map((image) => (
+                    <div style={{ padding: 10 }}>
+                        <img src={image.url} height="75"></img>
+                    </div>
+                ))}
                 <br></br>
                 <Button variant="contained" style={{ backgroundColor: 'green', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button>
             </div>
@@ -174,9 +129,9 @@ export default function Exam()
     function saveEditorData()
     {
         if (questionId)
-            editQuestion()
+            editQA()
         else
-            addQuestion()
+            addQA()
     }
 
     function goToQuestion(index)
@@ -184,6 +139,7 @@ export default function Exam()
         setQuestionId(questions[index].id)
         setQuestionIndex(index)
         setEditorState(questions[index].html)
+        getQuestionImages(questions[index].id)
     }
 
     function answerOnChange(e, i)
@@ -210,8 +166,74 @@ export default function Exam()
         setAnswers(tempArr)
         saveEditorData()
     }
+    async function getQA(index) 
+    {
+        await getAnswers()
+        await getQuestions(index)
+    }
 
-    function addQuestion()
+    async function getQuestionImages(qId)
+    {
+        return db.files.where("questionId", "==", qId)
+            .onSnapshot((querySnapshot) =>
+            {
+                let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
+
+                setImages(data)
+            })
+    }
+
+    async function getAnswers()
+    {
+        let querySnapshot = await db.answers.where("examId", "==", examId)
+            .orderBy("createdAt")
+            .get()
+
+        let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
+
+        setAnswers([...data.map(doc =>
+        {
+            return {
+                id: doc.id,
+                list: doc.list
+            }
+        })])
+    }
+
+    async function getQuestions(index)
+    {
+        const querySnapshot = await db.questions.where("examId", "==", examId)
+            .orderBy("createdAt")
+            .get()
+
+        const data = querySnapshot.docs.map(doc => db.formatDoc(doc));
+
+        // No questions
+        if (data.length === 0)
+        {
+            addQA()
+            return
+        }
+
+        setQuestions(data)
+
+        // First load with questions
+        if (!questionId)
+        {
+            setEditorState(data[0].html)
+            setQuestionId(data[0].id)
+            setQuestionIndex(0)
+        }
+        else // After first load
+        {
+            setQuestionIndex(index)
+            setEditorState(data[index].html)
+            setQuestionId(data[index].id)
+        }
+        getQuestionImages(data[index].id)
+    }
+
+    function addQA()
     {
         db.questions.add({
             html: "",
@@ -221,8 +243,8 @@ export default function Exam()
         })
             .then(async function (questionData)
             {
-                await db.answers.add({ list: [{ text: "", isCorrect: false }], examId, createdAt: db.getCurrentTimeStamp(), })
-                getQuestions(questions.length)
+                await db.answers.add({ list: [{ text: "", isCorrect: false }], examId, questionId: questionData.id, createdAt: db.getCurrentTimeStamp(), })
+                getQA(questions.length)
                 console.log("Document successfully written!");
             })
             .catch(function (error)
@@ -231,7 +253,7 @@ export default function Exam()
             });
     }
 
-    function editQuestion()
+    function editQA()
     {
         db.questions.doc(questionId).set({
             html: editorState,
@@ -241,7 +263,7 @@ export default function Exam()
             .then(async function ()
             {
                 await db.answers.doc(answers[questionIndex].id).set({ list: answers[questionIndex].list }, { merge: true })
-                getQuestions(questionIndex)
+                getQA(questionIndex)
                 console.log("Document successfully written!");
             })
             .catch(function (error)
