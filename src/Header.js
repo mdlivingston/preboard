@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAllergies } from '@fortawesome/free-solid-svg-icons'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import { Button } from 'react-bootstrap'
 import logo from './logo.svg';
@@ -11,7 +11,7 @@ export default function Header()
             <img className={'App-logo'} src={logo} alt="React"></img>
             <span style={{ flex: 1 }}></span>
             <Button variant="success">
-                <FontAwesomeIcon icon={faAllergies} />
+                <FontAwesomeIcon icon={faUser} />
             </Button>
 
         </div>

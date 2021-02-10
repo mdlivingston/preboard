@@ -137,7 +137,7 @@ export default function Exam()
                     />
                 </div>
                 <br></br>
-                <div>
+                <div style={{ width: '400px' }}>
                     <Form.Group>
                         {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
                             <div key={i}>
