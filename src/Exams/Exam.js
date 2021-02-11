@@ -3,7 +3,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { db } from '../firebase'
 import { useParams } from 'react-router-dom';
-import { Button, ButtonGroup, Col, Form } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './Exam.css'
@@ -61,10 +61,11 @@ export default function Exam()
 
             <div className="question-editor">
                 <br></br>
-                <ButtonGroup aria-label="Basic example">
-                    <Button onClick={(e) => setRadioValue('1')} variant="secondary">Admin View</Button>
-                    <Button onClick={(e) => setRadioValue('2')} variant="secondary">Customer View</Button>
-                </ButtonGroup>
+                <ToggleButtonGroup type="radio" name="options" defaultValue={"1"}>
+                    <ToggleButton onClick={(e) => setRadioValue('1')} value={'1'}>Admin View</ToggleButton>
+                    <ToggleButton onClick={(e) => setRadioValue('2')} value={'2'}>Customer View</ToggleButton>
+                </ToggleButtonGroup>
+
                 <br></br>
 
                 {radioValue === '1' && (
