@@ -3,7 +3,7 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { db } from '../firebase'
 import { useParams } from 'react-router-dom';
-import { Button, ButtonGroup, Col, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import { Button, Col, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './Exam.css'
@@ -100,8 +100,8 @@ export default function Exam()
                             <div className="half">
                                 <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
                                     <FontAwesomeIcon icon={faPlus} />
-                        &nbsp; Add Answer
-                        </Button>
+                                &nbsp; Add Answer
+                                </Button>
                                 <div style={{ width: '400px' }}>
                                     <Form.Group>
                                         {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
@@ -238,13 +238,7 @@ export default function Exam()
 
         let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
 
-        setAnswers([...data.map(doc =>
-        {
-            return {
-                id: doc.id,
-                list: doc.list
-            }
-        })])
+        setAnswers([...data])
     }
 
     async function getQuestions(index)

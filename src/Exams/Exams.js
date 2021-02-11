@@ -9,14 +9,7 @@ export default function Exams()
     const [exams, setExams] = useState([])
     useEffect(() =>
     {
-        // if (!currentUser)
-        // {
-        //     console.error("Error: Not Signed In!");
-        //     return
-        // }
-
         return db.exams
-            //.where("userId", "==", currentUser.uid)
             .orderBy("createdAt")
             .onSnapshot(snapshot =>
             {
