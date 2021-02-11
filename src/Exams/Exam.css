@@ -45,3 +45,22 @@
 .isSelected {
     background-color: grey;
 }
+
+.half-container {
+    align-items: center;
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.half {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-images{
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+}

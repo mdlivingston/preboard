@@ -69,7 +69,6 @@ export default function Exam()
 
                 {radioValue === '1' && (
                     <>
-
                         <div style={{ width: '750px' }}>
                             <CKEditor
                                 editor={ClassicEditor}
@@ -96,50 +95,58 @@ export default function Exam()
                             />
                         </div>
                         <br></br>
-                        <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
-                            <FontAwesomeIcon icon={faPlus} />
+                        <div className="half-container">
+                            <div className="half">
+                                <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
+                                    <FontAwesomeIcon icon={faPlus} />
                         &nbsp; Add Answer
-                    </Button>
-                        <div style={{ width: '400px' }}>
-                            <Form.Group>
-                                {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
-                                    <div key={i}>
-                                        <Form.Row>
-                                            <Form.Label column lg={2}>
-                                                <Form.Check
-                                                    type="radio"
-                                                    label={answerKeys[i] + '.'}
-                                                    checked={a.isCorrect}
-                                                    onChange={(e) => correctOnChange(e, i)}
-                                                />
-                                            </Form.Label>
-                                            <Col>
-                                                <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
-                                            </Col>
-                                        </Form.Row>
-                                        <br></br>
+                        </Button>
+                                <div style={{ width: '400px' }}>
+                                    <Form.Group>
+                                        {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
+                                            <div key={i}>
+                                                <Form.Row>
+                                                    <Form.Label column lg={2}>
+                                                        <Form.Check
+                                                            type="radio"
+                                                            label={answerKeys[i] + '.'}
+                                                            checked={a.isCorrect}
+                                                            onChange={(e) => correctOnChange(e, i)}
+                                                        />
+                                                    </Form.Label>
+                                                    <Col>
+                                                        <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
+                                                    </Col>
+                                                </Form.Row>
+                                                <br></br>
+                                            </div>
+                                        ))}
+                                    </Form.Group>
+                                </div>
+                            </div>
+
+                            <div className="half">
+                                <AddFileButton questionId={questionId} />
+                                <br></br>
+                                {images.length > 0 && images.map((image) => (
+                                    <div key={image.id} style={{ padding: 10 }}>
+                                        <img src={image.url} height="75"></img>
                                     </div>
                                 ))}
-                            </Form.Group>
-                        </div>
-
-                        <AddFileButton questionId={questionId} />
-                        <br></br>
-                        {images.length > 0 && images.map((image) => (
-                            <div key={image.id} style={{ padding: 10 }}>
-                                <img src={image.url} height="75"></img>
                             </div>
-                        ))}
+                        </div>
                     </>
                 )}
 
                 {radioValue === '2' && (
                     <>
-                        {images.length > 0 && images.map((image) => (
-                            <div key={image.id} style={{ padding: 10 }}>
-                                <img src={image.url} height="75"></img>
-                            </div>
-                        ))}
+                        <div className="customer-images">
+                            {images.length > 0 && images.map((image) => (
+                                <div key={image.id} style={{ padding: 10 }}>
+                                    <img src={image.url} height="75"></img>
+                                </div>
+                            ))}
+                        </div>
                         <p style={{ margin: 20 }} dangerouslySetInnerHTML={{ __html: editorState }}></p>
                         <div>
                             {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
