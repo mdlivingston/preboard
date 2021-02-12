@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './Exam.css'
 import AddFileButton from './AddFileButton';
+import Header from '../Header';
 
 const editorConfiguration = {
     toolbar: {
@@ -47,130 +48,138 @@ export default function Exam()
     }, [])
 
     return (
-        <div className="exam-page">
-            <div className="sidebar">
-                <div className="sidebar-section"><b>Questions</b></div>
-                {!questions && <div className="sidebar-section">1</div>}
-                {questions && questions.map((q, i) =>
-                (
-                    <div key={q.id} onClick={() => goToQuestion(i)} className="sidebar-section" style={{ backgroundColor: i === questionIndex ? 'lightgrey' : '' }}>{i + 1}</div>
-                ))}
-                <div onClick={addQA} className="sidebar-section"> + </div>
-            </div>
-            <br></br>
-
-            <div className="question-editor">
-                <br></br>
-                <ToggleButtonGroup type="radio" name="options" defaultValue={"1"}>
-                    <ToggleButton onClick={(e) => setRadioValue('1')} value={'1'}>Admin View</ToggleButton>
-                    <ToggleButton onClick={(e) => setRadioValue('2')} value={'2'}>Customer View</ToggleButton>
-                </ToggleButtonGroup>
-
-                <br></br>
-
-                {radioValue === '1' && (
-                    <>
-                        <div style={{ width: '750px' }}>
-                            <CKEditor
-                                editor={ClassicEditor}
-                                data={editorState}
-                                config={editorConfiguration}
-                                onReady={editor =>
-                                {
-                                }}
-                                onChange={(event, editor) =>
-                                {
-                                    const data = editor.getData();
-                                    setEditorState(data)
-                                    //console.log({ event, editor, data });
-                                }}
-                                onBlur={(event, editor) =>
-                                {
-                                    saveEditorData()
-                                    //console.log('Blur.', editor);
-                                }}
-                                onFocus={(event, editor) =>
-                                {
-                                    //console.log('Focus.', editor);
-                                }}
-                            />
+        <>
+            <Header />
+            <div className="exam-page">
+                <div className="sidebar">
+                    <div className="sidebar-section"><b>Questions</b></div>
+                    {!questions && <div className="sidebar-section">1</div>}
+                    {questions && questions.map((q, i) =>
+                    (
+                        <div key={q.id}
+                            onClick={() => goToQuestion(i)}
+                            className="sidebar-section"
+                            style={{ backgroundColor: i === questionIndex ? 'royalblue' : '', color: i === questionIndex ? 'white' : '' }}>
+                            {i + 1}
                         </div>
-                        <br></br>
-                        <div className="half-container">
-                            <div className="half">
-                                <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
-                                    <FontAwesomeIcon icon={faPlus} />
+                    ))}
+                    <div onClick={addQA} className="sidebar-section"> + </div>
+                </div>
+                <br></br>
+
+                <div className="question-editor">
+                    <br></br>
+                    <ToggleButtonGroup type="radio" name="options" defaultValue={"1"}>
+                        <ToggleButton onClick={(e) => setRadioValue('1')} value={'1'}>Admin View</ToggleButton>
+                        <ToggleButton onClick={(e) => setRadioValue('2')} value={'2'}>Customer View</ToggleButton>
+                    </ToggleButtonGroup>
+
+                    <br></br>
+
+                    {radioValue === '1' && (
+                        <>
+                            <div style={{ width: '750px' }}>
+                                <CKEditor
+                                    editor={ClassicEditor}
+                                    data={editorState}
+                                    config={editorConfiguration}
+                                    onReady={editor =>
+                                    {
+                                    }}
+                                    onChange={(event, editor) =>
+                                    {
+                                        const data = editor.getData();
+                                        setEditorState(data)
+                                        //console.log({ event, editor, data });
+                                    }}
+                                    onBlur={(event, editor) =>
+                                    {
+                                        saveEditorData()
+                                        //console.log('Blur.', editor);
+                                    }}
+                                    onFocus={(event, editor) =>
+                                    {
+                                        //console.log('Focus.', editor);
+                                    }}
+                                />
+                            </div>
+                            <br></br>
+                            <div className="half-container">
+                                <div className="half">
+                                    <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
+                                        <FontAwesomeIcon icon={faPlus} />
                                 &nbsp; Add Answer
                                 </Button>
-                                <div style={{ width: '400px' }}>
-                                    <Form.Group>
-                                        {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
-                                            <div key={i}>
-                                                <Form.Row>
-                                                    <Form.Label column lg={2}>
-                                                        <Form.Check
-                                                            type="radio"
-                                                            label={answerKeys[i] + '.'}
-                                                            checked={a.isCorrect}
-                                                            onChange={(e) => correctOnChange(e, i)}
-                                                        />
-                                                    </Form.Label>
-                                                    <Col>
-                                                        <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
-                                                    </Col>
-                                                </Form.Row>
-                                                <br></br>
-                                            </div>
-                                        ))}
-                                    </Form.Group>
+                                    <div style={{ width: '400px' }}>
+                                        <Form.Group>
+                                            {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
+                                                <div key={i}>
+                                                    <Form.Row>
+                                                        <Form.Label column lg={2}>
+                                                            <Form.Check
+                                                                type="radio"
+                                                                label={answerKeys[i] + '.'}
+                                                                checked={a.isCorrect}
+                                                                onChange={(e) => correctOnChange(e, i)}
+                                                            />
+                                                        </Form.Label>
+                                                        <Col>
+                                                            <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
+                                                        </Col>
+                                                    </Form.Row>
+                                                    <br></br>
+                                                </div>
+                                            ))}
+                                        </Form.Group>
+                                    </div>
+                                </div>
+
+                                <div className="half">
+                                    <AddFileButton questionId={questionId} />
+                                    <br></br>
+                                    {images.length > 0 && images.map((image) => (
+                                        <div key={image.id} style={{ padding: 10 }}>
+                                            <img src={image.url} height="75"></img>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
+                        </>
+                    )}
 
-                            <div className="half">
-                                <AddFileButton questionId={questionId} />
-                                <br></br>
+                    {radioValue === '2' && (
+                        <>
+                            <div className="customer-images">
                                 {images.length > 0 && images.map((image) => (
                                     <div key={image.id} style={{ padding: 10 }}>
                                         <img src={image.url} height="75"></img>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    </>
-                )}
+                            <p style={{ margin: "20px 75px 20px 75px" }} dangerouslySetInnerHTML={{ __html: editorState }}></p>
+                            <div>
+                                {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
+                                    <div key={i}>
+                                        <Form.Check
+                                            type="radio"
+                                            label={answerKeys[i] + '. ' + a.text}
+                                            checked={a.isCorrect}
+                                            onChange={(e) => correctOnChange(e, i)}
+                                        />
 
-                {radioValue === '2' && (
-                    <>
-                        <div className="customer-images">
-                            {images.length > 0 && images.map((image) => (
-                                <div key={image.id} style={{ padding: 10 }}>
-                                    <img src={image.url} height="75"></img>
-                                </div>
-                            ))}
-                        </div>
-                        <p style={{ margin: 20 }} dangerouslySetInnerHTML={{ __html: editorState }}></p>
-                        <div>
-                            {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
-                                <div key={i}>
-                                    <Form.Check
-                                        type="radio"
-                                        label={answerKeys[i] + '. ' + a.text}
-                                        checked={a.isCorrect}
-                                        onChange={(e) => correctOnChange(e, i)}
-                                    />
+                                        <br></br>
+                                    </div>
+                                ))}
+                            </div>
 
-                                    <br></br>
-                                </div>
-                            ))}
-                        </div>
-
-                    </>
-                )}
-                {/* <br></br>
+                        </>
+                    )}
+                    {/* <br></br>
                 <Button variant="contained" style={{ backgroundColor: 'green', marginBottom: '20px' }} onClick={saveEditorData}>Save Data</Button> */}
-            </div>
+                </div>
 
-        </div>
+            </div>
+        </>
     )
 
     function saveEditorData()

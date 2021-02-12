@@ -1,11 +1,31 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import React from 'react'
+import React, { useState } from 'react'
 import { Button, Dropdown } from 'react-bootstrap'
 import logo from './logo.svg';
+import { Link, useHistory } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Profile from './auth/Profile';
 
 export default function Header()
 {
+    const [error, setError] = useState('')
+    const { currentUser, logout } = useAuth()
+    const history = useHistory()
+
+    async function handleLogout()
+    {
+        setError('')
+
+        try
+        {
+            await logout()
+            history.push('/login')
+        } catch {
+            setError('Failed to log out')
+        }
+    }
+
     return (
         <div className="header">
             Preboard Exams
@@ -17,8 +37,8 @@ export default function Header()
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    <Dropdown.Item>Profile</Dropdown.Item>
-                    <Dropdown.Item>Logout</Dropdown.Item>
+                    <Dropdown.Item as={Link} to="/user">Profile</Dropdown.Item>
+                    <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
             {/* <Button variant="success">

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import AddExam from './AddExam';
 import { db } from '../firebase';
+import Header from '../Header';
 
 export default function Exams()
 {
@@ -18,27 +19,30 @@ export default function Exams()
 
     }, [])
     return (
-        <div className="exams-page">
-            <div className="flex-r">
+        <>
+            <Header />
+            <div className="exams-page">
+                <div className="flex-r">
 
+                </div>
+                <div className="flex-r">
+                    <AddExam />
+                </div>
+                <br></br>
+                <div className="content">
+                    {exams && (
+                        exams.map(e => (
+                            <Button
+                                key={e.id}
+                                style={{ margin: 5 }}
+                                to={{ pathname: `/exams/${e.id}` }}
+                                as={Link}>
+                                {e.name}
+                            </Button>
+                        )))
+                    }
+                </div>
             </div>
-            <div className="flex-r">
-                <AddExam />
-            </div>
-            <br></br>
-            <div className="content">
-                {exams && (
-                    exams.map(e => (
-                        <Button
-                            key={e.id}
-                            style={{ margin: 5 }}
-                            to={{ pathname: `/exams/${e.id}` }}
-                            as={Link}>
-                            {e.name}
-                        </Button>
-                    )))
-                }
-            </div>
-        </div>
+        </>
     )
 }
