@@ -3,7 +3,7 @@ import { Card, Form, Button, Alert } from 'react-bootstrap'
 import { useAuth } from '../context/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
 import CenteredContainer from './CenteredContainer'
-
+import logo from '../logo.svg';
 export default function Signup()
 {
     const emailRef = useRef()
@@ -34,7 +34,11 @@ export default function Signup()
         <CenteredContainer>
             <Card>
                 <Card.Body>
-                    <h2 className="text-center mb-4">Log In</h2>
+                    <div style={{ fontSize: 32, textAlign: 'center' }}>
+                        Preboard Exams
+                        <img className={'App-logo'} src={logo} alt="React"></img>
+                    </div>
+                    <br></br>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group id="email">
