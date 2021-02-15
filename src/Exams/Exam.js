@@ -1,44 +1,73 @@
-import React, { useEffect } from 'react'
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import React, { useEffect, useReducer } from 'react'
 import { db } from '../firebase'
 import { useParams } from 'react-router-dom';
-import { Button, Col, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import './Exam.css'
 import AddFileButton from './AddFileButton';
 import Header from '../Header';
+import Sidebar from './Sidebar';
+import TextEditor from './TextEditor';
+import Answers from './Answers';
+import { answerKeys } from './Answers'
 
-const editorConfiguration = {
-    toolbar: {
-        items: [
-            'heading', '|',
-            'bold', 'italic', '|',
-            'link', '|',
-            'outdent', 'indent', '|',
-            'bulletedList', 'numberedList', '|',
-            'insertTable', '|',
-            'undo', 'redo'
-        ],
-    },
-    mediaEmbed: {
-        previewsInData: true
+
+
+export const ACTIONS = {
+    SET_QUESTIONS: 'set-questions',
+    SET_ANSWERS: 'set-answers',
+    SET_IMAGES: 'set-images',
+    SET_CURRENT_QUESTION: 'set-current-question',
+    SET_EDITOR_DATA: 'set-editor-data'
+}
+
+function reducer(state, { type, payload })
+{
+    switch (type)
+    {
+        case ACTIONS.SET_QUESTIONS:
+            return {
+                ...state,
+                questions: payload.questions
+            }
+        case ACTIONS.SET_ANSWERS:
+            return {
+                ...state,
+                answers: payload.answers
+            }
+        case ACTIONS.SET_IMAGES:
+            return {
+                ...state,
+                images: payload.images
+            }
+        case ACTIONS.SET_EDITOR_DATA:
+            return {
+                ...state,
+                editorState: payload.editorState
+            }
+        case ACTIONS.SET_CURRENT_QUESTION:
+            return {
+                ...state,
+                questionId: payload.questionId,
+                questionIndex: payload.questionIndex,
+                editorState: payload.editorState
+            }
+        default:
+            return state
     }
-};
-
-const answerKeys = ["A", "B", "C", "D", "E", "F", "G", "H"]
+}
 
 export default function Exam()
 {
-    const [questionId, setQuestionId] = React.useState();
-    const [questionIndex, setQuestionIndex] = React.useState(0);
-    const [editorState, setEditorState] = React.useState();
-    const [questions, setQuestions] = React.useState([]);
-    const [answers, setAnswers] = React.useState([]);
-    const [images, setImages] = React.useState([]);
     const [radioValue, setRadioValue] = React.useState('1');
 
+    const [state, dispatch] = useReducer(reducer, {
+        questions: [],
+        answers: [],
+        images: [],
+        questionId: '',
+        questionIndex: 0,
+        editorState: ''
+    })
 
     const { examId } = useParams()
 
@@ -51,20 +80,9 @@ export default function Exam()
         <>
             <Header />
             <div className="exam-page">
-                <div className="sidebar">
-                    <div className="sidebar-section"><b>Questions</b></div>
-                    {!questions && <div className="sidebar-section">1</div>}
-                    {questions && questions.map((q, i) =>
-                    (
-                        <div key={q.id}
-                            onClick={() => goToQuestion(i)}
-                            className="sidebar-section"
-                            style={{ backgroundColor: i === questionIndex ? 'royalblue' : '', color: i === questionIndex ? 'white' : '' }}>
-                            {i + 1}
-                        </div>
-                    ))}
-                    <div onClick={addQA} className="sidebar-section"> + </div>
-                </div>
+
+                <Sidebar state={state} goToQuestion={goToQuestion} addQA={addQA} />
+
                 <br></br>
 
                 <div className="question-editor">
@@ -78,66 +96,20 @@ export default function Exam()
 
                     {radioValue === '1' && (
                         <>
-                            <div style={{ width: '750px' }}>
-                                <CKEditor
-                                    editor={ClassicEditor}
-                                    data={editorState}
-                                    config={editorConfiguration}
-                                    onReady={editor =>
-                                    {
-                                    }}
-                                    onChange={(event, editor) =>
-                                    {
-                                        const data = editor.getData();
-                                        setEditorState(data)
-                                        //console.log({ event, editor, data });
-                                    }}
-                                    onBlur={(event, editor) =>
-                                    {
-                                        saveEditorData()
-                                        //console.log('Blur.', editor);
-                                    }}
-                                    onFocus={(event, editor) =>
-                                    {
-                                        //console.log('Focus.', editor);
-                                    }}
-                                />
-                            </div>
+                            <TextEditor state={state} dispatch={dispatch} saveEditorData={saveEditorData} />
+
                             <br></br>
+
                             <div className="half-container">
+
                                 <div className="half">
-                                    <Button variant="contained" disabled={answers[questionIndex] && answers[questionIndex].list.length > 7} style={{ backgroundColor: 'lightblue', marginBottom: '20px' }} onClick={addAnswer}>
-                                        <FontAwesomeIcon icon={faPlus} />
-                                &nbsp; Add Answer
-                                </Button>
-                                    <div style={{ width: '400px' }}>
-                                        <Form.Group>
-                                            {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
-                                                <div key={i}>
-                                                    <Form.Row>
-                                                        <Form.Label column lg={2}>
-                                                            <Form.Check
-                                                                type="radio"
-                                                                label={answerKeys[i] + '.'}
-                                                                checked={a.isCorrect}
-                                                                onChange={(e) => correctOnChange(e, i)}
-                                                            />
-                                                        </Form.Label>
-                                                        <Col>
-                                                            <Form.Control onBlur={saveEditorData} value={a.text} onChange={(e) => answerOnChange(e, i)} type="text" as={'textarea'} placeholder="Answer text..." />
-                                                        </Col>
-                                                    </Form.Row>
-                                                    <br></br>
-                                                </div>
-                                            ))}
-                                        </Form.Group>
-                                    </div>
+                                    <Answers state={state} dispatch={dispatch} saveEditorData={saveEditorData} />
                                 </div>
 
                                 <div className="half">
-                                    <AddFileButton questionId={questionId} />
+                                    <AddFileButton questionId={state.questionId} />
                                     <br></br>
-                                    {images.length > 0 && images.map((image) => (
+                                    {state.images.length > 0 && state.images.map((image) => (
                                         <div key={image.id} style={{ padding: 10 }}>
                                             <img src={image.url} height="75"></img>
                                         </div>
@@ -150,21 +122,21 @@ export default function Exam()
                     {radioValue === '2' && (
                         <>
                             <div className="customer-images">
-                                {images.length > 0 && images.map((image) => (
+                                {state.images.length > 0 && state.images.map((image) => (
                                     <div key={image.id} style={{ padding: 10 }}>
                                         <img src={image.url} height="75"></img>
                                     </div>
                                 ))}
                             </div>
-                            <p style={{ margin: "20px 75px 20px 75px" }} dangerouslySetInnerHTML={{ __html: editorState }}></p>
+                            <p style={{ margin: "20px 75px 20px 75px" }} dangerouslySetInnerHTML={{ __html: state.editorState }}></p>
                             <div>
-                                {answers[questionIndex] && answers[questionIndex].list.map((a, i) => (
+                                {state.answers[state.questionIndex] && state.answers[state.questionIndex].list.map((a, i) => (
                                     <div key={i}>
                                         <Form.Check
                                             type="radio"
                                             label={answerKeys[i] + '. ' + a.text}
                                             checked={a.isCorrect}
-                                            onChange={(e) => correctOnChange(e, i)}
+                                            onChange={(e) => { }}
                                         />
 
                                         <br></br>
@@ -184,7 +156,7 @@ export default function Exam()
 
     function saveEditorData()
     {
-        if (questionId)
+        if (state.questionId)
             editQA()
         else
             addQA()
@@ -192,36 +164,18 @@ export default function Exam()
 
     function goToQuestion(index)
     {
-        setQuestionId(questions[index].id)
-        setQuestionIndex(index)
-        setEditorState(questions[index].html)
-        getQuestionImages(questions[index].id)
-    }
-
-    function answerOnChange(e, i)
-    {
-        let tempArr = [...answers]
-        tempArr[questionIndex].list[i].text = e.target.value
-        setAnswers(tempArr)
-    }
-    function correctOnChange(e, i)
-    {
-        let tempArr = [...answers]
-        tempArr[questionIndex].list.forEach((a, mi) =>
-        {
-            a.isCorrect = mi === i && e.target.value === 'on' ? true : false
+        dispatch({
+            type: ACTIONS.SET_CURRENT_QUESTION,
+            payload: {
+                editorState: state.questions[index].html,
+                questionIndex: index,
+                questionId: state.questions[index].id
+            }
         })
-        setAnswers(tempArr)
-        saveEditorData()
+
+        getQuestionImages(state.questions[index].id)
     }
 
-    function addAnswer()
-    {
-        let tempArr = [...answers];
-        tempArr[questionIndex].list = [...tempArr[questionIndex].list, { text: "", isCorrect: false }]
-        setAnswers(tempArr)
-        saveEditorData()
-    }
     async function getQA(index) 
     {
         await getAnswers()
@@ -235,7 +189,10 @@ export default function Exam()
             {
                 let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
 
-                setImages(data)
+                dispatch({
+                    type: ACTIONS.SET_IMAGES,
+                    payload: { images: data }
+                })
             })
     }
 
@@ -247,7 +204,10 @@ export default function Exam()
 
         let data = querySnapshot.docs.map(doc => db.formatDoc(doc));
 
-        setAnswers([...data])
+        dispatch({
+            type: ACTIONS.SET_ANSWERS,
+            payload: { answers: data }
+        })
     }
 
     async function getQuestions(index)
@@ -265,20 +225,33 @@ export default function Exam()
             return
         }
 
-        setQuestions(data)
+        dispatch({
+            type: ACTIONS.SET_QUESTIONS,
+            payload: { questions: data }
+        })
 
         // First load with questions
-        if (!questionId)
+        if (!state.questionId)
         {
-            setEditorState(data[0].html)
-            setQuestionId(data[0].id)
-            setQuestionIndex(0)
+            dispatch({
+                type: ACTIONS.SET_CURRENT_QUESTION,
+                payload: {
+                    editorState: data[0].html,
+                    questionIndex: 0,
+                    questionId: data[0].id
+                }
+            })
         }
         else // After first load
         {
-            setQuestionIndex(index)
-            setEditorState(data[index].html)
-            setQuestionId(data[index].id)
+            dispatch({
+                type: ACTIONS.SET_CURRENT_QUESTION,
+                payload: {
+                    editorState: data[index].html,
+                    questionIndex: 0,
+                    questionId: data[index].id
+                }
+            })
         }
         getQuestionImages(data[index].id)
     }
@@ -294,7 +267,7 @@ export default function Exam()
             .then(async function (questionData)
             {
                 await db.answers.add({ list: [{ text: "", isCorrect: false }], examId, questionId: questionData.id, createdAt: db.getCurrentTimeStamp(), })
-                getQA(questions.length)
+                getQA(state.questions.length)
                 console.log("Document successfully written!");
             })
             .catch(function (error)
@@ -305,15 +278,15 @@ export default function Exam()
 
     function editQA()
     {
-        db.questions.doc(questionId).set({
-            html: editorState,
+        db.questions.doc(state.questionId).set({
+            html: state.editorState,
             examId,
             //userId: User.uid
         }, { merge: true })
             .then(async function ()
             {
-                await db.answers.doc(answers[questionIndex].id).set({ list: answers[questionIndex].list }, { merge: true })
-                getQA(questionIndex)
+                await db.answers.doc(state.answers[state.questionIndex].id).set({ list: state.answers[state.questionIndex].list }, { merge: true })
+                getQA(state.questionIndex)
                 console.log("Document successfully written!");
             })
             .catch(function (error)
