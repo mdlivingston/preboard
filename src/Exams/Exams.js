@@ -17,7 +17,7 @@ export default function Exams()
                 setExams(snapshot.docs.map(db.formatDoc))
             })
 
-    }, [])
+    }, [exams])
     return (
         <>
             <Header />
